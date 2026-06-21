@@ -46,3 +46,28 @@ async def generic_text_router(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error(f"خطای پیش‌بینی‌نشده: {context.error}", exc_info=context.error)
+def build_application() -> Application:
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+
+    app.add_handler(CommandHandler("start", start_handler))
+    app.add_handler(CommandHandler("plans", plans_command))
+    app.add_handler(CommandHandler("admin", admin_panel_entry))
+
+
+    app.add_handler(CallbackQueryHandler(check_force_join_callback, pattern=r"^check_force_join$"))
+    app.add_handler(CallbackQueryHandler(quality_selection_callback, pattern=r"^dl_quality:"))
+    app.add_handler(CallbackQueryHandler(request_plan_callback, pattern=r"^req_plan:"))
+    app.add_handler(CallbackQueryHandler(admin_callback_router, pattern=r"^adm:"))
+
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, generic_text_router))
+
+
+    app.add_handler(MessageHandler(
+        (filters.PHOTO | filters.VIDEO | filters.Document.ALL) & ~filters.COMMAND,
+        handle_broadcast_message_input,
+    ))
+
+    app.add_error_handler(error_handler)
+    return app
