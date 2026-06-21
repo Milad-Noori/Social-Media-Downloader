@@ -71,3 +71,21 @@ def build_application() -> Application:
 
     app.add_error_handler(error_handler)
     return app
+
+def main() -> None:
+    if not BOT_TOKEN:
+        logger.error("BOT_TOKEN در فایل .env تنظیم نشده است. برنامه متوقف شد.")
+        sys.exit(1)
+
+    logger.info("راه‌اندازی دیتابیس...")
+    init_db()
+
+    logger.info("ساخت اپلیکیشن بات...")
+    app = build_application()
+
+    logger.info("بات شروع به کار کرد. در انتظار پیام‌ها...")
+    app.run_polling(allowed_updates=Update.ALL_TYPES)
+
+
+if __name__ == "__main__":
+    main()
